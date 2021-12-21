@@ -12,17 +12,30 @@ class DontCrushDuckieTaskSolution(TaskSolution):
         img, _, _, _ = self.env.step([0,0])
         
         condition = True
+        opposite_lane = False
         
         while condition:
             img, reward, done, info = self.env.step([1, 0])
             self.env.render()
             
-            if img.sum(axis=(0, 1))[1] > 29000000:
+            duck_ahead = img.sum(axis=(0, 1))[1] > 29000000
+            
+            if duck_ahead and not opposite_lane:
+                self.move_left()
+                opposite_lane = True
+                
+            if not duck_ahead and opposite_lane:
+                self.move_right()
+                opposite_lane = False
+                
+                for _ in range(20):
+                    img, reward, done, info = self.env.step([1, 0])
+                    self.env.render()
+                
                 condition = False
-                self.go_around()
                 
                 
-    def go_around(self):
+    def move_left(self):
         for _ in range(20):
             img, reward, done, info = self.env.step([0, 1])
             self.env.render()
@@ -39,6 +52,8 @@ class DontCrushDuckieTaskSolution(TaskSolution):
             img, reward, done, info = self.env.step([1, 0])
             self.env.render()
             
+            
+    def move_right(self):
         for _ in range(20):
             img, reward, done, info = self.env.step([0, -1])
             self.env.render()
@@ -51,7 +66,7 @@ class DontCrushDuckieTaskSolution(TaskSolution):
             img, reward, done, info = self.env.step([0, 1])
             self.env.render()
             
-        for _ in range(30):
+        for _ in range(8):
             img, reward, done, info = self.env.step([1, 0])
             self.env.render()
         
